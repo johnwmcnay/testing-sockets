@@ -7,34 +7,51 @@ socket.on('serverMsg', data => {
 
 socket.on('loadGame', data => {
 
-    let game = data.game;
     document.getElementById("start").hidden = true;
 
-    for (let index in game.matchesToRun) {
-        let container = document.createElement("div")
-        container.id = "container" + index;
-        container.innerText = "match" + (Number(index) + 1).toString();
-        let match = game.matchesToRun[index];
+    //obj has complete data to draw to page
+    for (let obj of data) {
+        let element = document.createElement(obj.element)
+        element.id = obj.id;
+        element.innerText = obj.text;
 
-        for (let player of Object.keys(match.contestants)) {
-            let playerDiv = document.createElement("div");
-            playerDiv.innerText = player;
-            playerDiv.id = player;
-            for (let option of game.ruleSets.ruleSets[match.rulesID].options) {
-                let btn = document.createElement("button");
-                btn.textContent = option.id;
-                btn.onclick = function() {
-                    // console.log(player, option.id);
-                    socket.emit('choice', {"playerID": player, "option": option.id});
-                }
-                if (match.contestants[player].isBot === true) {
-                    btn.disabled = true;
-                }
-                playerDiv.appendChild(btn);
+        attachAllChildren(element, obj)
+        document.body.append(element);
+    }
+});
+
+function attachAllChildren(element, obj) {
+
+    let childElement;
+    let data = [];
+
+    for (let childData of obj.childData) {
+
+        childElement = document.createElement(childData.element);
+        childElement.innerText = childData.text;
+        childElement.id = childData.id;
+        
+        if (childData.element === "button") {
+            childElement.onclick = function () {
+                socket.emit('choice', {
+                    "choice": this.innerText,
+                    "player": childData.player,
+                });
             }
-            container.appendChild(playerDiv);
+            childElement.disabled = childData.disabled;
         }
-        document.body.appendChild(container);
+
+        if (childData.childData.length === 0) {
+            data.push(childElement);
+        } else {
+            let toAdd = attachAllChildren(element, childData);
+            for (let child of toAdd) {
+                childElement.appendChild(child);
+            }
+            element.appendChild(childElement);
+        }
+
     }
 
-});
+    return data;
+}
