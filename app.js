@@ -56,15 +56,23 @@ var io = require('socket.io')(serv,{});
 io.sockets.on('connection', socket => {
   console.log('socket connection');
 
-  socket.on('startGame', (data) => {
-    console.log(data);
-    socket.emit('loadGame', game);
+  socket.on('startGame', () => {
+    socket.emit('loadGame', {"game": game});
+  });
+
+  socket.on('choice', data => {
+    console.log("choice", data.playerID, data.option)
+    //TODO: handle choice, AI picks, show result
+
   });
 
   socket.emit('serverMsg', {
     msg:'hello'
   });
 });
+
+//TODO: need methods or new classes to handle room/game management
+
 
 // rpsGame
 //TODO: a game has players, rps matches, rules/options, handles game logic
