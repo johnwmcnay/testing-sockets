@@ -1,0 +1,7 @@
+.idea
+bin
+node_modules
+routes
+views
+*.iml
+*.json
