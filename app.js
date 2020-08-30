@@ -51,6 +51,21 @@ app.use('/client', express.static(__dirname + '/public'));
 serv.listen(2000);
 console.log("Server Started.")
 
+
+var io = require('socket.io')(serv,{});
+io.sockets.on('connection', socket => {
+  console.log('socket connection');
+
+  socket.on('startGame', (data) => {
+    console.log(data);
+    socket.emit('loadGame', game);
+  });
+
+  socket.emit('serverMsg', {
+    msg:'hello'
+  });
+});
+
 // rpsGame
 //TODO: a game has players, rps matches, rules/options, handles game logic
 // build to handle one-on-one, tournament, alternate rules (i.e. extreme RPS)
@@ -70,37 +85,37 @@ class rpsGame {
 
   //TODO---create logic to evaluate game matches after p1 presses a button
   // NOTE--this only handles single-player
-  runMatches() {
-    let game = this;
-    for (let index in this.matchesToRun) {
-      let container = document.createElement("div")
-      container.id = "container" + index;
-      container.innerText = "match" + (Number(index) + 1).toString();
-      let match = this.matchesToRun[index];
-
-      for (let player of Object.keys(match.contestants)) {
-        let playerDiv = document.createElement("div");
-        playerDiv.innerText = player;
-        playerDiv.id = player;
-
-        for (let option of this.optionsIn(match.rulesID)) {
-          let btn = document.createElement("button");
-          btn.textContent = option.id;
-          btn.onclick = function() {
-            console.log(player, option.id);
-            //TODO: function to simulate the rest
-            game.restOfRound();
-          }
-          if (match.contestants[player].isBot === true) {
-            btn.disabled = true;
-          }
-          playerDiv.appendChild(btn);
-        }
-        container.appendChild(playerDiv);
-      }
-      document.body.appendChild(container);
-    }
-  }
+  // runMatches() {
+  //   let game = this;
+  //   for (let index in this.matchesToRun) {
+  //     let container = document.createElement("div")
+  //     container.id = "container" + index;
+  //     container.innerText = "match" + (Number(index) + 1).toString();
+  //     let match = this.matchesToRun[index];
+  //
+  //     for (let player of Object.keys(match.contestants)) {
+  //       let playerDiv = document.createElement("div");
+  //       playerDiv.innerText = player;
+  //       playerDiv.id = player;
+  //
+  //       for (let option of this.optionsIn(match.rulesID)) {
+  //         let btn = document.createElement("button");
+  //         btn.textContent = option.id;
+  //         btn.onclick = function() {
+  //           console.log(player, option.id);
+  //           //TODO: function to simulate the rest
+  //           game.restOfRound();
+  //         }
+  //         if (match.contestants[player].isBot === true) {
+  //           btn.disabled = true;
+  //         }
+  //         playerDiv.appendChild(btn);
+  //       }
+  //       container.appendChild(playerDiv);
+  //     }
+  //     document.body.appendChild(container);
+  //   }
+  // }
 
   restOfRound() {
     console.log("rest of round");
@@ -319,3 +334,24 @@ class rpsBot extends rpsPlayer {
         this.isBot = true;
     }
 }
+
+let rock = new rpsChoice("rock",
+    ">scissors", "<paper", "=rock",
+);
+
+let paper = new rpsChoice("paper",
+    ">rock", "<scissors", "=paper",
+);
+
+let scissors = new rpsChoice("scissors",
+    ">paper", "<rock", "=scissors",
+);
+
+let game = new rpsGame();
+game.addRuleSet("standard", rock, paper, scissors)
+game.addPlayer("p1");
+game.addBots(1);
+game.newMatch("p1", "b1");
+// game.newMatch("b2", "b3");
+// game.runMatches();
+console.log(game);
