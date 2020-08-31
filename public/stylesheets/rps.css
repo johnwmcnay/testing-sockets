@@ -1,0 +1,24 @@
+#lobby {
+    width: 300px;
+    height: 300px;
+    background-color: gray;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#seats {
+    display: flex;
+    width: 60%;
+    height: 50%;
+    align-items: center;
+    justify-content: center;
+}
+
+.seatSlot {
+    width: 75px;
+    height: 75px;
+    margin: 10px;
+}
